@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Agregar Paciente</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Agregar Paciente</h1>
+        <form method="POST">
+            {{ form.hidden_tag() }}
+            <div class="form-group">
+                {{ form.nombres.label(class="form-label") }}
+                {{ form.nombres(class="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.apellidos.label(class="form-label") }}
+                {{ form.apellidos(class="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.tipo_documento.label(class="form-label") }}
+                {{ form.tipo_documento(class="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.numero_documento.label(class="form-label") }}
+                {{ form.numero_documento(class="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.ciudad.label(class="form-label") }}
+                {{ form.ciudad(class="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.departamento.label(class="form-label") }}
+                {{ form.departamento(class="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.pais.label(class="form-label") }}
+                {{ form.pais(class="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.direccion.label(class="form-label") }}
+                {{ form.direccion(class="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.telefono.label(class="form-label") }}
+                {{ form.telefono(class="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.correo_electronico.label(class="form-label") }}
+                {{ form.correo_electronico(class="form-control") }}
+            </div>
+            <div class="form-check">
+                {{ form.tiene_eps(class="form-check-input") }}
+                {{ form.tiene_eps.label(class="form-check-label") }}
+            </div>
+            {% if form.tiene_eps.data %}
+            <div class="form-group">
+                {{ form.nombre_eps.label(class="form-label") }}
+                {{ form.nombre_eps(class="form-control") }}
+            </div>
+            {% endif %}
+            <button type="submit" class="btn btn-primary">Guardar</button>
+        </form>
+    </div>
+</body>
+</html>
