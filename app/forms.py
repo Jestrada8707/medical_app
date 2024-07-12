@@ -1,17 +1,32 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SelectField, BooleanField
-from wtforms.validators import InputRequired, Email, Length, Optional
+from wtforms import StringField, PasswordField, SelectField, BooleanField
+from wtforms.validators import DataRequired, Email, EqualTo, ValidationError, Optional, Length
+from app.models import Role
 
-class PacienteForm(FlaskForm):
-    nombres = StringField('Nombres', validators=[InputRequired(), Length(max=100)])
-    apellidos = StringField('Apellidos', validators=[InputRequired(), Length(max=100)])
-    tipo_documento = SelectField('Tipo de Documento', choices=[('cedula', 'Cédula'), ('pasaporte', 'Pasaporte'), ('cedula_extranjeria', 'Cédula de Extranjería')], validators=[InputRequired()])
-    numero_documento = StringField('Número de Documento', validators=[InputRequired(), Length(max=20)])
-    ciudad = StringField('Ciudad', validators=[Optional(), Length(max=100)])
-    departamento = StringField('Departamento', validators=[Optional(), Length(max=100)])
-    pais = StringField('País', validators=[Optional(), Length(max=100)])
-    direccion = StringField('Dirección', validators=[Optional(), Length(max=255)])
-    telefono = StringField('Teléfono', validators=[Optional(), Length(max=20)])
-    correo_electronico = StringField('Correo Electrónico', validators=[Optional(), Email(), Length(max=100)])
-    tiene_eps = BooleanField('Tiene EPS')
-    nombre_eps = StringField('Nombre de EPS', validators=[Optional(), Length(max=100)])
+class UserForm(FlaskForm):
+    username = StringField('Username', validators=[DataRequired(), Length(max=64)])
+    email = StringField('Email', validators=[DataRequired(), Email(), Length(max=120)])
+    password = PasswordField('Password', validators=[DataRequired(), EqualTo('confirm', message='Passwords must match')])
+    confirm = PasswordField('Repeat Password')
+    first_name = StringField('First Name', validators=[DataRequired(), Length(max=64)])
+    last_name = StringField('Last Name', validators=[DataRequired(), Length(max=64)])
+    document_type = SelectField('Document Type', choices=[('CC', 'Cédula de Ciudadanía'), ('TI', 'Tarjeta de Identidad')], validators=[DataRequired()])
+    document_number = StringField('Document Number', validators=[DataRequired(), Length(max=64)])
+    role = SelectField('Role', choices=[], validators=[DataRequired()])
+    professional_card_number = StringField('Professional Card Number', validators=[Optional(), Length(max=64)])
+
+    def validate_professional_card_number(form, field):
+        if form.role.data == 'medico' and not field.data:
+            raise ValidationError('El número de tarjeta profesional es obligatorio para el rol médico.')
+
+    def __init__(self, *args, **kwargs):
+        super(UserForm, self).__init__(*args, **kwargs)
+        self.role.choices = [(role.id, role.name) for role in Role.query.all()]
+
+
+class LoginForm(FlaskForm):
+    username = StringField('Username', validators=[DataRequired(), Length(max=64)])
+    password = PasswordField('Password', validators=[DataRequired()])
+    remember_me = BooleanField('Remember Me')
+
+

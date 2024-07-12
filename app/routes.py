@@ -1,45 +1,33 @@
-from flask import render_template, request, jsonify, flash, redirect, url_for
-from flask_login import current_user
-from app import app, db
-from app.models import Paciente
-from app.forms import PacienteForm
-from app.utils import admin_required
+from flask import render_template, redirect, url_for, flash, request
+from flask_login import login_user, logout_user, current_user, login_required
+from app.models import User
+from app.forms import LoginForm
+from app import app, db, bcrypt
 
 @app.route('/')
+@app.route('/index')
 def index():
-    pacientes = Paciente.query.all()
-    return render_template('index.html', pacientes=pacientes)
+    return render_template('index.html', title='Home')
 
-@app.route('/admin/dashboard')
-@admin_required
-def admin_dashboard():
-    return render_template('admin_dashboard.html')
-
-@app.route('/agregar_paciente', methods=['GET', 'POST'])
-def agregar_paciente():
-    form = PacienteForm()
-
-    if form.validate_on_submit():
-        nuevo_paciente = Paciente(
-            nombres=form.nombres.data,
-            apellidos=form.apellidos.data,
-            tipo_documento=form.tipo_documento.data,
-            numero_documento=form.numero_documento.data,
-            ciudad=form.ciudad.data,
-            departamento=form.departamento.data,
-            pais=form.pais.data,
-            direccion=form.direccion.data,
-            telefono=form.telefono.data,
-            correo_electronico=form.correo_electronico.data,
-            tiene_eps=form.tiene_eps.data,
-            nombre_eps=form.nombre_eps.data if form.tiene_eps.data else None
-        )
-
-        db.session.add(nuevo_paciente)
-        db.session.commit()
-
-        flash('Paciente agregado correctamente', 'success')  # Mensaje flash para el usuario
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if current_user.is_authenticated:
         return redirect(url_for('index'))
 
-    return render_template('agregar_paciente.html', form=form)
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(username=form.username.data).first()
+        if user and bcrypt.check_password_hash(user.password_hash, form.password.data):
+            login_user(user, remember=form.remember_me.data)
+            next_page = request.args.get('next')
+            return redirect(next_page or url_for('index'))
+        else:
+            flash('Invalid username or password.', 'danger')
 
+    return render_template('login.html', title='Log In', form=form)
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('index'))
